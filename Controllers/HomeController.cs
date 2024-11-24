@@ -9,11 +9,18 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private readonly HttpClient _httpClientNotesAPI;
+    private readonly string _notesAPIHost;
 
     public HomeController(ILogger<HomeController> logger, HttpClient httpClientNotesAPI)
     {
         _logger = logger;
         _httpClientNotesAPI = httpClientNotesAPI;
+        var notesAPIHost = Environment.GetEnvironmentVariable("NOTESAPI_HOST");
+        if (notesAPIHost == null){
+            _notesAPIHost =  "https://localhost:7276";
+        } else {
+            _notesAPIHost = notesAPIHost;
+        }
     }
 
     public IActionResult Index()
@@ -31,7 +38,7 @@ public class HomeController : Controller
     }
 
     public IActionResult NoteResults(string noteID){
-        var response = _httpClientNotesAPI.GetAsync($"https://localhost:7276/api/Notes/{noteID}");
+        var response = _httpClientNotesAPI.GetAsync($"{_notesAPIHost}/api/Notes/{noteID}");
         HttpResponseMessage responseMessage = response.Result;
         var result = responseMessage.Content.ReadAsStringAsync().Result;
         dynamic notes = JsonConvert.DeserializeObject(result);
