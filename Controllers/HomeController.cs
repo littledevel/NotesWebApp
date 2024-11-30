@@ -17,7 +17,7 @@ public class HomeController : Controller
         _httpClientNotesAPI = httpClientNotesAPI;
         var notesAPIHost = Environment.GetEnvironmentVariable("NOTESAPI_HOST");
         if (notesAPIHost == null){
-            _notesAPIHost =  "https://localhost:7276";
+            _notesAPIHost =  "https://localhost:7000";
         } else {
             _notesAPIHost = notesAPIHost;
         }
@@ -39,6 +39,7 @@ public class HomeController : Controller
 
     public IActionResult NoteResults(string noteID){
         var response = _httpClientNotesAPI.GetAsync($"{_notesAPIHost}/api/Notes/{noteID}");
+        Console.WriteLine($"ID sent: {noteID}");
         HttpResponseMessage responseMessage = response.Result;
         var result = responseMessage.Content.ReadAsStringAsync().Result;
         dynamic notes = JsonConvert.DeserializeObject(result);
@@ -48,6 +49,18 @@ public class HomeController : Controller
         }
         return View(models);
     }
+
+    
+    public IActionResult NoteResult(string noteID){
+        var response = _httpClientNotesAPI.GetAsync($"https://localhost:7000/api/Notes/{noteID}");
+        HttpResponseMessage responseMessage = response.Result;
+        var result = responseMessage.Content.ReadAsStringAsync().Result;
+        dynamic note = JsonConvert.DeserializeObject(result);
+        ViewData["title"]  = note.title;
+        ViewData["content"] = note.content;
+        return View();
+    }
+
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
